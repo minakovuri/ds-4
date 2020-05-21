@@ -1,0 +1,21 @@
+{
+    "BackendApi": 
+    {
+        "host": "backend-api",
+        "port": 5000
+    },
+    "Frontend": 
+    {
+        "port": 5001
+    },
+    "Redis":
+    {
+        "host": "redis",
+        "port": 6379
+    },
+    "Nats":
+    {
+        "host": "nats",
+        "port": 4222
+    }
+}
