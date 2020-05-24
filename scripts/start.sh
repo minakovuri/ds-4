@@ -24,11 +24,14 @@ docker run --rm -d -p ${NATS_PORT}:4222 --name nats nats
 echo " ---------  Run Redis  -------------"
 docker run --rm -d -p ${REDIS_PORT}:6379 --name redis redis
 
-# echo " --------- Run BackendApi ------------ "
-# docker run -e NATS_HOST=${NATS_HOST} -e NATS_PORT=${NATS_PORT} -e REDIS_HOST=${REDIS_HOST} -e REDIS_PORT=${REDIS_PORT} --rm -d -p ${BACKEND_API_PORT}:${BACKEND_API_PORT} --ip ${BACKEND_API_HOST} --name backend-api --link=nats --link=redis ds-3/backend-api
+echo " --------- Run BackendApi ------------ "
+docker run -e ASPNETCORE_URLS=http://+:${BACKEND_API_PORT} -e NATS_HOST=${NATS_HOST} -e NATS_PORT=${NATS_PORT} -e REDIS_HOST=${REDIS_HOST} -e REDIS_PORT=${REDIS_PORT} --rm -d -p ${BACKEND_API_PORT}:${BACKEND_API_PORT} --name backend-api --link=nats --link=redis ds-4/backend-api
 
-# echo " ---------  Run Frontend   ------------ "
-# docker run -e ASPNETCORE_URLS=http://+:${FRONTEND_PORT} -e BACKEND_API_HOST=$BACKEND_API_HOST -e BACKEND_API_PORT=${BACKEND_API_PORT} --rm -p ${FRONTEND_PORT}:${FRONTEND_PORT} --name frontend --link=backend-api:${BACKEND_API_HOST} ds-3/frontend
+echo " ---------  Run Frontend   ------------ "
+docker run -e ASPNETCORE_URLS=http://+:${FRONTEND_PORT} -e BACKEND_API_HOST=${BACKEND_API_HOST} -e BACKEND_API_PORT=${BACKEND_API_PORT} --rm -d -p ${FRONTEND_PORT}:${FRONTEND_PORT} --name frontend --link=backend-api:${BACKEND_API_HOST} ds-4/frontend
 
-# echo " --------- Run JobLogger ------------ "
-# docker run -e NATS_HOST=${NATS_HOST} -e NATS_PORT=${NATS_PORT} -e REDIS_HOST=${REDIS_HOST} -e REDIS_PORT=${REDIS_PORT} --rm --name job-logger --link=nats --link=redis ds-3/job-logger
+echo " --------- Run JobLogger ------------ "
+docker run -e NATS_HOST=${NATS_HOST} -e NATS_PORT=${NATS_PORT} -e REDIS_HOST=${REDIS_HOST} -e REDIS_PORT=${REDIS_PORT} --rm -d --name job-logger --link=nats --link=redis ds-4/job-logger
+
+echo " --------- Run TextRankCalc ------------ "
+docker run -e NATS_HOST=${NATS_HOST} -e NATS_PORT=${NATS_PORT} -e REDIS_HOST=${REDIS_HOST} -e REDIS_PORT=${REDIS_PORT} --rm -d --name text-rank-calc --link=nats --link=redis ds-4/text-rank-calc

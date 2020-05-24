@@ -14,3 +14,6 @@ docker stop nats
 
 echo " --- Stop JobLogger ----"
 docker stop job-logger
+
+echo " --- Stop TextRankCalc ----"
+docker stop text-rank-calc

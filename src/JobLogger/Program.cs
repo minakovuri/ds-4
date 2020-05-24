@@ -15,11 +15,9 @@ namespace JobLogger
     {   
         private static bool running = true;
 
-        private static readonly string _natsUrl = "nats://localhost:4222";
-        //private static readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
+        private static readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
 
-        private static readonly string _redisUrl = "localhost:6379";
-        //private static readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
+        private static readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
 
         static void Main(string[] args)
         {
@@ -28,7 +26,7 @@ namespace JobLogger
             
             Program.Subscribe();
 
-            //Console.WriteLine("----- JobLogger service is running ------");
+            Console.WriteLine("----- JobLogger service is running ------");
 
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
             {
@@ -38,7 +36,7 @@ namespace JobLogger
 
             while (running) { }
 
-            //Console.WriteLine("------ JobLogger service is shut down ------ ");
+            Console.WriteLine("------ JobLogger service is shut down ------ ");
         }
 
         static void Subscribe()

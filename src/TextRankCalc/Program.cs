@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Collections.Generic;
 using NATS.Client;
 using NATS.Client.Rx;
 using NATS.Client.Rx.Ops;
@@ -8,18 +7,15 @@ using System.Linq;
 using TextRankCalc.Models;
 using StackExchange.Redis;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace TextRankCalc
 {
     class Program
     {
         private static bool running = true;
-
-        private static readonly string _natsUrl = "nats://localhost:4222";
-        //private static readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
-
-        private static readonly string _redisUrl = "localhost:6379";
-        //private static readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
+        private static readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
+        private static readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
 
         static void Main(string[] args)
         {
@@ -28,6 +24,8 @@ namespace TextRankCalc
             
             Program.Subscribe();
 
+            Console.WriteLine("----- TextRankCalc service is running ------");
+
             Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
             {
                 e.Cancel = true;
@@ -35,6 +33,8 @@ namespace TextRankCalc
             };
 
             while (running) { }
+
+            Console.WriteLine("----- TextRankCalc service is shut down ------");
         }
 
         static void Subscribe()
@@ -70,21 +70,9 @@ namespace TextRankCalc
 
         static double CalculateTextRank(string text)
         {
-            var vowels = new HashSet<char> { 'a', 'e', 'i', 'o', 'u' };
-
-            var consonants = new HashSet<char> { 'q', 'w', 'r', 't', 'y', 'p', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm' };
-
-            string lowerCaseText = text.ToLower();
-
-            int vowelsCount = lowerCaseText.Count(ch => vowels.Contains(ch));
-            int consonantsCount = lowerCaseText.Count(ch => consonants.Contains(ch));
-
-            if (consonantsCount == 0)
-            {
-                consonantsCount = 1;
-            }
-
-            return vowelsCount / consonantsCount;
+            double vowelsCount = Regex.Matches(text, @"[AEIOUaeiou]").Count;
+            double consonantsCount = Regex.Matches(text, @"[QWRTYPSDFGHJKLZXCVBNMqwrtypsdfghjklzxcvbnm]").Count;
+            return vowelsCount / Math.Max(consonantsCount, 1);
         }
     }
 }

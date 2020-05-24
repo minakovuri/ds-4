@@ -24,12 +24,9 @@ namespace BackendApi.Services
 
         private readonly IConnection _nats;
 
-        //private readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
-        private readonly string _natsUrl = "nats://localhost:4222";
+        private readonly string _natsUrl = "nats://" + Environment.GetEnvironmentVariable("NATS_HOST") + ":" + Environment.GetEnvironmentVariable("NATS_PORT");
 
-        //private readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
-
-        private readonly string _redisUrl = "localhost:6379";
+        private readonly string _redisUrl = Environment.GetEnvironmentVariable("REDIS_HOST") + ":" + Environment.GetEnvironmentVariable("REDIS_PORT");
 
         public JobService(ILogger<JobService> logger)
         {
@@ -56,22 +53,22 @@ namespace BackendApi.Services
 
         public override Task<GetProcessingResultResponse> GetProcessingResult(GetProcessingResultRequest request, ServerCallContext context)
         {
-            double rank = GetRankFromRedis(request.Id);
+            RedisPayload payload = GetPayloadFromRedis(request.Id);
 
             var resp = new GetProcessingResultResponse { 
-                Rank = rank,
-                Status = rank == -1 
+                Rank = payload.Rank,
+                Status = payload.Rank == -1 
                     ? "1"
-                    : "2" 
+                    : "2",
+                Description = payload.Description,
+                Text = payload.Data,
             };
     
             return Task.FromResult(resp);
         }
         
-        private double GetRankFromRedis(string id) 
+        private RedisPayload GetPayloadFromRedis(string id) 
         {
-            double rank = -1;
-
             IDatabase db = _redis.GetDatabase();
             int index = 0;
             while (index++ < MAX_RETRIES)
@@ -81,14 +78,13 @@ namespace BackendApi.Services
                 var model = JsonSerializer.Deserialize<RedisPayload>(JSON);
                 if (model.Rank != -1)
                 {
-                    rank = model.Rank;
-                    break;
+                    return model;
                 }
 
                 Thread.Sleep(SLEEP_TIMEOUT);
             }
 
-            return rank;
+            return null;
         }
 
         async private Task SendMessageToRedis(string id, string description, string data)

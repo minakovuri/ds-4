@@ -11,6 +11,8 @@ message GetProcessingResultRequest {
 message GetProcessingResultResponse {
   double rank = 1;
   string status = 2;
+  string description = 3;
+  string text = 4;
 }
 
 // The job service definition.

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,10 +27,8 @@ namespace Frontend.Controllers
         [HttpPost]
         async public Task<IActionResult> HandleAddTaskRequest(String description, String text)
         {
-            //using var channel = GrpcChannel.ForAddress("http://" + Environment.GetEnvironmentVariable("BACKEND_API_HOST") + ":" + Environment.GetEnvironmentVariable("BACKEND_API_PORT"));
-
-            using var channel = GrpcChannel.ForAddress("http://localhost:5000");
-            
+            using var channel = GrpcChannel.ForAddress("http://" + Environment.GetEnvironmentVariable("BACKEND_API_HOST") + ":" + Environment.GetEnvironmentVariable("BACKEND_API_PORT"));
+           
             var client = new Job.JobClient(channel);
             var reply = await client.RegisterAsync(new RegisterRequest { 
                 Description = description,
